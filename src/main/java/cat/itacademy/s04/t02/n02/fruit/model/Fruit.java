@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "fruits")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,10 +21,10 @@ public class Fruit {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name="weight_in_kilos")
     private int weightInKilos;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "provider_id")
+    @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 }

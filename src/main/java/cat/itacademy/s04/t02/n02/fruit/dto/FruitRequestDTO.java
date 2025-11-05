@@ -8,7 +8,7 @@ public record FruitRequestDTO(
     @NotBlank(message = "Fruit cannot be blank")
     String name,
     @Positive(message = "Weight must be positive")
-    int weightInKilos
+    int weightInKilos,
     @NotNull(message = "Supplier ID is required")
     Long supplierId
 ) { }

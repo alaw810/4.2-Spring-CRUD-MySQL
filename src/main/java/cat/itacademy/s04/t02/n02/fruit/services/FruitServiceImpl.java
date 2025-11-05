@@ -2,8 +2,11 @@ package cat.itacademy.s04.t02.n02.fruit.services;
 
 import cat.itacademy.s04.t02.n02.fruit.dto.FruitRequestDTO;
 import cat.itacademy.s04.t02.n02.fruit.dto.FruitResponseDTO;
+import cat.itacademy.s04.t02.n02.fruit.dto.SupplierResponseDTO;
 import cat.itacademy.s04.t02.n02.fruit.model.Fruit;
+import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
 import cat.itacademy.s04.t02.n02.fruit.repository.FruitRepository;
+import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -14,62 +17,39 @@ import java.util.Optional;
 public class FruitServiceImpl implements FruitService{
 
     private final FruitRepository fruitRepository;
+    private final SupplierRepository supplierRepository;
 
-    public FruitServiceImpl(FruitRepository fruitRepository) {
+    public FruitServiceImpl(FruitRepository fruitRepository, SupplierRepository supplierRepository) {
         this.fruitRepository = fruitRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     @Override
     public FruitResponseDTO addFruit(FruitRequestDTO request) {
-        Fruit fruit = new Fruit(null, request.name(), request.weightInKilos());
-        Fruit saved = fruitRepository.save(fruit);
-        return mapToDto(saved);
+        Supplier supplier = supplierRepository.findById(request.supplierId())
+                .orElseThrow(() -> new EntityNotFoundException("Supplier with ID " + request.supplierId() + " not found"));
+
+        Fruit saved = fruitRepository.save(new Fruit(null, request.name(), request.weightInKilos(), supplier));
+        return mapToDto(saved, supplier);
     }
 
-    @Override
-    public List<FruitResponseDTO> getAllFruits() {
-        List<Fruit> fruits = fruitRepository.findAll();
-        return mapToDtoList(fruits);
-    }
-
-    @Override
-    public Optional<FruitResponseDTO> getFruitById(Long id) {
-        return fruitRepository.findById(id)
-                .map(this::mapToDto);
-    }
-
-    @Override
-    public FruitResponseDTO updateFruit(Long id, FruitRequestDTO request) {
-        Fruit fruit = fruitRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Fruit with ID " + id + " not found"));
-
-        fruit.setName(request.name());
-        fruit.setWeightInKilos(request.weightInKilos());
-
-        Fruit updated = fruitRepository.save(fruit);
-
-        return mapToDto(updated);
-    }
-
-    @Override
-    public void deleteFruit(Long id) {
-        Fruit fruit = fruitRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Fruit with ID " + id + " not found"));
-
-        fruitRepository.delete(fruit);
-    }
-
-    private FruitResponseDTO mapToDto(Fruit fruit) {
+    private FruitResponseDTO mapToDto(Fruit fruit, Supplier supplier) {
         return new FruitResponseDTO(
                 fruit.getId(),
                 fruit.getName(),
-                fruit.getWeightInKilos());
+                fruit.getWeightInKilos(),
+                new SupplierResponseDTO(
+                        supplier.getId(),
+                        supplier.getName(),
+                        supplier.getCountry()
+                )
+        );
     }
 
-    private List<FruitResponseDTO> mapToDtoList(List<Fruit> fruits) {
+    /*private List<FruitResponseDTO> mapToDtoList(List<Fruit> fruits) {
         return fruits.stream()
                 .map(this::mapToDto)
                 .toList();
-    }
+    }*/
 
 }

@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n02.fruit.controllers;
 import cat.itacademy.s04.t02.n02.fruit.dto.FruitRequestDTO;
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
 import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
+import cat.itacademy.s04.t02.n02.fruit.repository.FruitRepository;
 import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,10 +28,14 @@ class FruitControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private FruitRepository fruitRepository;
+
+    @Autowired
     private SupplierRepository supplierRepository;
 
     @BeforeEach
     void cleanDatabase() {
+        fruitRepository.deleteAll();
         supplierRepository.deleteAll();
     }
 
