@@ -16,8 +16,13 @@ public class SupplierServiceImpl implements SupplierService{
 
     @Override
     public SupplierResponseDTO addSupplier(SupplierRequestDTO request) {
+        if (supplierRepository.existsByName(request.name())) {
+            throw new IllegalArgumentException("Supplier name already exists");
+        }
+
         Supplier supplier = new Supplier(null, request.name(), request.country());
         Supplier saved = supplierRepository.save(supplier);
+
         return new SupplierResponseDTO(saved.getId(), saved.getName(), saved.getCountry());
     }
 }

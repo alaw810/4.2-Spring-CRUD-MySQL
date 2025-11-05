@@ -22,10 +22,14 @@ public class SupplierController {
     }
 
     @PostMapping
-    public ResponseEntity<SupplierResponseDTO> createSupplier(
+    public ResponseEntity<?> createSupplier(
             @Valid @RequestBody SupplierRequestDTO request) {
+        try {
+            SupplierResponseDTO created = supplierService.addSupplier(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
-        SupplierResponseDTO created = supplierService.addSupplier(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 }

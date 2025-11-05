@@ -1,6 +1,7 @@
 package cat.itacademy.s04.t02.n02.fruit.controllers;
 
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
+import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,14 @@ class SupplierControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private SupplierRepository supplierRepository;
+
     @BeforeEach
     void cleanDatabase() {
-        // to be added later
+        supplierRepository.deleteAll();
     }
+
 
     @Test
     void createSupplier_returnsCreatedSupplier_whenDataIsValid() throws Exception {
@@ -40,4 +45,41 @@ class SupplierControllerTest {
                 .andExpect(jsonPath("$.name").value("Tropical Exports"))
                 .andExpect(jsonPath("$.country").value("Brazil"));
     }
+
+    @Test
+    void createSupplier_returns400_whenNameAlreadyExists() throws Exception {
+        SupplierRequestDTO supplier1 = new SupplierRequestDTO("Profruits", "Spain");
+        SupplierRequestDTO supplier2 = new SupplierRequestDTO("Profruits", "France");
+
+        mockMvc.perform(post("/suppliers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(supplier1)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/suppliers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(supplier2)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSupplier_returns400_whenNameIsBlank() throws Exception {
+        SupplierRequestDTO supplier = new SupplierRequestDTO("", "Portugal");
+
+        mockMvc.perform(post("/suppliers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(supplier)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSupplier_returns400_whenCountryIsBlank() throws Exception {
+        SupplierRequestDTO supplier = new SupplierRequestDTO("Amazon Fruits", "");
+
+        mockMvc.perform(post("/suppliers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(supplier)))
+                .andExpect(status().isBadRequest());
+    }
+
 }
