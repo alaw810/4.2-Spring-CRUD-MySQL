@@ -1,6 +1,7 @@
 package cat.itacademy.s04.t02.n02.fruit.controllers;
 
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
+import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
 import cat.itacademy.s04.t02.n02.fruit.repository.FruitRepository;
 import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -84,6 +86,68 @@ class SupplierControllerTest {
         mockMvc.perform(post("/suppliers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(supplier)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateSupplier_returns200_whenDataIsValid() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "FruitWorld", "China"));
+
+        SupplierRequestDTO update = new SupplierRequestDTO("FruitWorld Japan", "Japan");
+
+        mockMvc.perform(put("/suppliers/" + supplier.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(supplier.getId()))
+                .andExpect(jsonPath("$.name").value("FruitWorld Japan"))
+                .andExpect(jsonPath("$.country").value("Japan"));
+    }
+
+    @Test
+    void updateSupplier_returns404_whenSupplierDoesNotExist() throws Exception {
+        SupplierRequestDTO update = new SupplierRequestDTO("NonExistent", "Germany");
+
+        mockMvc.perform(put("/suppliers/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateSupplier_returns400_whenNameAlreadyExists() throws Exception {
+        Supplier s1 = supplierRepository.save(new Supplier(null, "AlphaFruits", "Spain"));
+        Supplier s2 = supplierRepository.save(new Supplier(null, "BetaFruits", "France"));
+
+        SupplierRequestDTO update = new SupplierRequestDTO("AlphaFruits", "France");
+
+        mockMvc.perform(put("/suppliers/" + s2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateSupplier_returns400_whenNameIsBlank() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "FruitKing", "Spain"));
+
+        SupplierRequestDTO update = new SupplierRequestDTO("  ", "Portugal");
+
+        mockMvc.perform(put("/suppliers/" + supplier.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateSupplier_returns400_whenCountryIsBlank() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "FruitLand", "Italy"));
+
+        SupplierRequestDTO update = new SupplierRequestDTO("FruitLand", "   ");
+
+        mockMvc.perform(put("/suppliers/" + supplier.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
                 .andExpect(status().isBadRequest());
     }
 
