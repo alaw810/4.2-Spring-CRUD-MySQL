@@ -2,6 +2,7 @@ package cat.itacademy.s04.t02.n02.fruit.controllers;
 
 import cat.itacademy.s04.t02.n02.fruit.dto.FruitRequestDTO;
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
+import cat.itacademy.s04.t02.n02.fruit.model.Fruit;
 import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
 import cat.itacademy.s04.t02.n02.fruit.repository.FruitRepository;
 import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -97,5 +99,38 @@ class FruitControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getFruitsBySupplier_returns200_andListOfFruits_whenSupplierExists() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "FruitHouse", "Spain"));
+        fruitRepository.save(new Fruit(null, "Apple", 5, supplier));
+        fruitRepository.save(new Fruit(null, "Pear", 7, supplier));
+
+        mockMvc.perform(get("/fruits")
+                        .param("supplierId", String.valueOf(supplier.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Apple"))
+                .andExpect(jsonPath("$[1].name").value("Pear"));
+    }
+
+    @Test
+    void getFruitsBySupplier_returnsEmptyList_whenSupplierExistsButNoFruits() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "No Fruits", "Portugal"));
+
+        mockMvc.perform(get("/fruits")
+                        .param("supplierId", String.valueOf(supplier.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+    }
+
+    @Test
+    void getFruitsBySupplier_returns404_whenSupplierDoesNotExist() throws Exception {
+        mockMvc.perform(get("/fruits")
+                        .param("supplierId", "999"))
+                .andExpect(status().isNotFound());
+
     }
 }
