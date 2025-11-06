@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/fruits")
 public class FruitController {
@@ -28,4 +30,15 @@ public class FruitController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping
+    public ResponseEntity<?> getFruitsBySupplier(@RequestParam Long supplierId) {
+        try {
+            List<FruitResponseDTO> fruits = fruitService.getFruitsBySupplierId(supplierId);
+            return ResponseEntity.ok(fruits);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 }

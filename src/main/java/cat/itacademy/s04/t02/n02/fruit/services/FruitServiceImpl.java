@@ -33,6 +33,26 @@ public class FruitServiceImpl implements FruitService{
         return mapToDto(saved, supplier);
     }
 
+    @Override
+    public List<FruitResponseDTO> getFruitsBySupplierId(Long supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        return fruitRepository.findBySupplierId(supplierId).stream()
+                .map(fruit -> new FruitResponseDTO(
+                        fruit.getId(),
+                        fruit.getName(),
+                        fruit.getWeightInKilos(),
+                        new SupplierResponseDTO(
+                                supplier.getId(),
+                                supplier.getName(),
+                                supplier.getCountry()
+                        )
+                ))
+                .toList();
+    }
+
+
     private FruitResponseDTO mapToDto(Fruit fruit, Supplier supplier) {
         return new FruitResponseDTO(
                 fruit.getId(),
