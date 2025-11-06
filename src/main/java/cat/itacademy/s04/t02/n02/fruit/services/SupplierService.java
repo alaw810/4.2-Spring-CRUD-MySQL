@@ -5,4 +5,5 @@ import cat.itacademy.s04.t02.n02.fruit.dto.SupplierResponseDTO;
 
 public interface SupplierService {
     SupplierResponseDTO addSupplier(SupplierRequestDTO request);
+    SupplierResponseDTO updateSupplier(Long id, SupplierRequestDTO request);
 }

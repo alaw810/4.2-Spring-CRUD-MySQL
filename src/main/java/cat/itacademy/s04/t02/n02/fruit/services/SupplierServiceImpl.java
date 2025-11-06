@@ -4,6 +4,7 @@ import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierResponseDTO;
 import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
 import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,5 +25,23 @@ public class SupplierServiceImpl implements SupplierService{
         Supplier saved = supplierRepository.save(supplier);
 
         return new SupplierResponseDTO(saved.getId(), saved.getName(), saved.getCountry());
+    }
+
+    @Override
+    public SupplierResponseDTO updateSupplier(Long id, SupplierRequestDTO request) {
+        Supplier existing = supplierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Supplier with id " + id + " not found"));
+
+        if (supplierRepository.existsByName(request.name())
+        && !existing.getName().equalsIgnoreCase(request.name())) {
+            throw new IllegalArgumentException("Supplier name already exists");
+        }
+
+        existing.setName(request.name());
+        existing.setCountry(request.country());
+
+        Supplier updated = supplierRepository.save(existing);
+
+        return new SupplierResponseDTO(updated.getId(), updated.getName(), updated.getCountry());
     }
 }
