@@ -1,6 +1,7 @@
 package cat.itacademy.s04.t02.n02.fruit.controllers;
 
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
+import cat.itacademy.s04.t02.n02.fruit.model.Fruit;
 import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
 import cat.itacademy.s04.t02.n02.fruit.repository.FruitRepository;
 import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
@@ -13,8 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -148,6 +148,29 @@ class SupplierControllerTest {
         mockMvc.perform(put("/suppliers/" + supplier.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteSupplier_returns204_whenSupplierExistsWithoutFruits() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "DeleteMe", "Spain"));
+
+        mockMvc.perform(delete("/suppliers/" + supplier.getId()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteSupplier_returns404_whenSupplierDoesNotExist() throws Exception {
+        mockMvc.perform(delete("/suppliers/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteSupplier_returns400_whenSupplierHasAssociatedFruits() throws Exception {
+        Supplier supplier = supplierRepository.save(new Supplier(null, "Fruitful", "Brazil"));
+        fruitRepository.save(new Fruit(null, "Banana", 10, supplier));
+
+        mockMvc.perform(delete("/suppliers/" + supplier.getId()))
                 .andExpect(status().isBadRequest());
     }
 
