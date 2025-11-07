@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/suppliers")
 public class SupplierController {
@@ -28,6 +30,18 @@ public class SupplierController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SupplierResponseDTO>> getAllSuppliers() {
+        List<SupplierResponseDTO> suppliers = supplierService.getAllSuppliers();
+        return ResponseEntity.ok(suppliers);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SupplierResponseDTO> getSupplierById(@PathVariable Long id) {
+        SupplierResponseDTO supplier = supplierService.getSupplierById(id);
+        return ResponseEntity.ok(supplier);
     }
 
     @PutMapping("/{id}")

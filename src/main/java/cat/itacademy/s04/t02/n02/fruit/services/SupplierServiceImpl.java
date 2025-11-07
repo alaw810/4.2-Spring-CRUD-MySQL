@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class SupplierServiceImpl implements SupplierService{
@@ -31,6 +32,20 @@ public class SupplierServiceImpl implements SupplierService{
         Supplier saved = supplierRepository.save(supplier);
 
         return new SupplierResponseDTO(saved.getId(), saved.getName(), saved.getCountry());
+    }
+
+    @Override
+    public List<SupplierResponseDTO> getAllSuppliers() {
+        return supplierRepository.findAll().stream()
+                .map(s -> new SupplierResponseDTO(s.getId(), s.getName(), s.getCountry()))
+                .toList();
+    }
+
+    @Override
+    public SupplierResponseDTO getSupplierById(Long id) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Supplier with id " + id + " not found"));
+        return new SupplierResponseDTO(supplier.getId(), supplier.getName(), supplier.getCountry());
     }
 
     @Override
