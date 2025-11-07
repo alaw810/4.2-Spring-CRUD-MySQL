@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -87,6 +89,27 @@ class SupplierControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(supplier)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAllSuppliers_returnsEmptyListInitially() throws Exception {
+        mockMvc.perform(get("/suppliers"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void getAllSuppliers_returnsListOfSuppliers() throws Exception {
+        Supplier supplier1 = new Supplier(null, "FreshFarm", "Spain");
+        Supplier supplier2 = new Supplier(null, "GreenWorld", "Italy");
+        supplierRepository.saveAll(List.of(supplier1, supplier2));
+
+        mockMvc.perform(get("/suppliers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("FreshFarm"))
+                .andExpect(jsonPath("$[1].name").value("GreenWorld"));
     }
 
     @Test
