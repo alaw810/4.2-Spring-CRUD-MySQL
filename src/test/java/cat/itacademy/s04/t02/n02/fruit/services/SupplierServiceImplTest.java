@@ -66,6 +66,56 @@ class SupplierServiceImplTest {
     }
 
     @Test
+    void getAllSuppliers_shouldReturnListOfDTOs_whenSuppliersExist() {
+        Supplier supplier1 = new Supplier(1L, "FreshFarm", "Spain");
+        Supplier supplier2 = new Supplier(2L, "GreenWorld", "Italy");
+        when(supplierRepository.findAll()).thenReturn(List.of(supplier1, supplier2));
+
+        List<SupplierResponseDTO> result = supplierService.getAllSuppliers();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).name()).isEqualTo("FreshFarm");
+        assertThat(result.get(0).country()).isEqualTo("Spain");
+        assertThat(result.get(1).name()).isEqualTo("GreenWorld");
+        assertThat(result.get(1).country()).isEqualTo("Italy");
+
+        verify(supplierRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getAllSuppliers_shouldReturnEmptyList_whenNoSuppliersExist() {
+        when(supplierRepository.findAll()).thenReturn(List.of());
+
+        List<SupplierResponseDTO> result = supplierService.getAllSuppliers();
+
+        assertThat(result).isEmpty();
+        verify(supplierRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getSupplierById_shouldReturnDTO_whenSupplierExists() {
+        when(supplierRepository.findById(1L)).thenReturn(Optional.of(supplier));
+
+        SupplierResponseDTO result = supplierService.getSupplierById(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.name()).isEqualTo("FreshFarm");
+        assertThat(result.country()).isEqualTo("Spain");
+        verify(supplierRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void getSupplierById_shouldThrow_whenSupplierNotFound() {
+        when(supplierRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> supplierService.getSupplierById(99L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Supplier with id 99 not found");
+
+        verify(supplierRepository, times(1)).findById(99L);
+    }
+
+    @Test
     void updateSupplier_shouldUpdateAndReturnDTO_whenSupplierExistsAndNameUnique() {
         SupplierRequestDTO request = new SupplierRequestDTO("FreshFarmUpdated", "France");
 
