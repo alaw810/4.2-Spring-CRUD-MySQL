@@ -22,23 +22,32 @@ public class FruitController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createFruit(@Valid @RequestBody FruitRequestDTO request) {
-        try {
-            FruitResponseDTO created = fruitService.addFruit(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<FruitResponseDTO> create(@Valid @RequestBody FruitRequestDTO request) {
+        FruitResponseDTO created = fruitService.addFruit(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FruitResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(fruitService.getFruitById(id));
     }
 
     @GetMapping
-    public ResponseEntity<?> getFruitsBySupplier(@RequestParam Long supplierId) {
-        try {
-            List<FruitResponseDTO> fruits = fruitService.getFruitsBySupplierId(supplierId);
-            return ResponseEntity.ok(fruits);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    public ResponseEntity<List<FruitResponseDTO>> list(@RequestParam(required = false) Long supplierId) {
+        if (supplierId != null) {
+            return ResponseEntity.ok(fruitService.getFruitsBySupplierId(supplierId));
         }
+        return ResponseEntity.ok(fruitService.getAllFruits());
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<FruitResponseDTO> update(@PathVariable Long id, @Valid @RequestBody FruitRequestDTO request) {
+        return ResponseEntity.ok(fruitService.updateFruit(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        fruitService.deleteFruit(id);
+        return ResponseEntity.noContent().build();
+    }
 }
