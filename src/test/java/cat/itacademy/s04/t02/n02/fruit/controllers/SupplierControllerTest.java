@@ -113,6 +113,24 @@ class SupplierControllerTest {
     }
 
     @Test
+    void getSupplierById_returnsSupplier_whenExists() throws Exception {
+        Supplier saved = supplierRepository.save(new Supplier(null, "FreshFarm", "Spain"));
+
+        mockMvc.perform(get("/suppliers/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(saved.getId()))
+                .andExpect(jsonPath("$.name").value("FreshFarm"))
+                .andExpect(jsonPath("$.country").value("Spain"));
+    }
+
+    @Test
+    void getSupplierById_returns404_whenNotFound() throws Exception {
+        mockMvc.perform(get("/suppliers/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void updateSupplier_returns200_whenDataIsValid() throws Exception {
         Supplier supplier = supplierRepository.save(new Supplier(null, "FruitWorld", "China"));
 
