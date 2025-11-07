@@ -3,16 +3,22 @@ package cat.itacademy.s04.t02.n02.fruit.services;
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierRequestDTO;
 import cat.itacademy.s04.t02.n02.fruit.dto.SupplierResponseDTO;
 import cat.itacademy.s04.t02.n02.fruit.model.Supplier;
+import cat.itacademy.s04.t02.n02.fruit.repository.FruitRepository;
 import cat.itacademy.s04.t02.n02.fruit.repository.SupplierRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class SupplierServiceImpl implements SupplierService{
-    private final SupplierRepository supplierRepository;
 
-    public SupplierServiceImpl(SupplierRepository supplierRepository) {
+    private final SupplierRepository supplierRepository;
+    private final FruitRepository fruitRepository;
+
+    public SupplierServiceImpl(SupplierRepository supplierRepository, FruitRepository fruitRepository) {
         this.supplierRepository = supplierRepository;
+        this.fruitRepository = fruitRepository;
     }
 
     @Override
@@ -43,5 +49,17 @@ public class SupplierServiceImpl implements SupplierService{
         Supplier updated = supplierRepository.save(existing);
 
         return new SupplierResponseDTO(updated.getId(), updated.getName(), updated.getCountry());
+    }
+
+    @Override
+    public void deleteSupplier(Long id) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Supplier with id " + id + " not found"));
+
+        if (!fruitRepository.findBySupplierId(id).isEmpty()) {
+            throw new IllegalStateException("Cannot delete supplier with associated fruits");
+        }
+
+        supplierRepository.delete(supplier);
     }
 }
