@@ -112,4 +112,4 @@ docker run -p 8080:8080 fruit-api
 
 **Adrià Lorente**  
 📍 IT Academy – Java Back-End Development  
-📚 Exercise: *S4.02 – API REST with Spring Boot (Level 2 - MySQL)*  
+📚 Exercise: *S04.T02.N02 – API REST with Spring Boot (Level 2 - MySQL)*  
